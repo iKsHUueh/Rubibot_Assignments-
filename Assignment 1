@@ -6,51 +6,45 @@ def process_face(image_path, start_x, start_y, stride):
     Reads an image, converts to HSV, and extracts a 3x3 array of [H, S, V] 
     averages based on dynamic target mapping.
     """
-    # [Milestone 1] Load the file into memory as an active pixel array matrix
+    # [Milestone 1] 
     image = cv2.imread(image_path)
     
     if image is None:
         print(f"Warning: Could not load image {image_path}. Returning zeroed array.")
         return np.zeros((3, 3, 3))
 
-    # [Milestone 2] Map from BGR format directly into the shadow-resistant HSV space
+    # [Milestone 2] 
     hsv_image = cv2.cvtColor(image, cv2.COLOR_BGR2HSV)
 
-    # [Milestone 3] Initialize a zero-filled NumPy grid destination array (3, 3, 3)
+    # [Milestone 3] 
     face_array = np.zeros((3, 3, 3))
 
-    # Build a double-nested tracking loop
     for row in range(3):
         for col in range(3):
-            # Dynamically project the target center values
+            # projecting the target center values
             target_x = int(start_x + (col * stride))
             target_y = int(start_y + (row * stride))
 
-            # Isolate a localized 10x10 pixel bounding area centered accurately
             y_start = target_y - 5
             y_end = target_y + 5
             x_start = target_x - 5
             x_end = target_x + 5
 
-            # Slice the exact matching coordinates out of the new HSV image matrix
             patch = hsv_image[y_start:y_end, x_start:x_end]
 
-            # Compute the uniform Hue, Saturation, and Value averages
+            # the uniform Hue, Saturation, and Value averages
             mean_hsv = np.mean(patch, axis=(0, 1))
 
-            # Store that vector value straight into the tracking array position
+            # Storing that vector value straight into the tracking array position
             face_array[row][col] = mean_hsv
 
-    # [Milestone 4] Pass back the finished (3, 3, 3) face array
+    # [Milestone 4] 
     return face_array
 
 def main():
     # [Milestone 4] Initialize master 4D tracking NumPy array defined with shape (6, 3, 3, 3)
     cube_data = np.zeros((6, 3, 3, 3))
 
-    # Supply 6 independent image frames configurations
-    # Ordered sequentially: Up, Down, Front, Back, Left, Right
-    # NOTE: You will need to replace the paths and tracking parameters with your real data!
     faces_config = [
         {"path": "up.jpg", "start_x": 100, "start_y": 100, "stride": 50},    # Index 0
         {"path": "down.jpg", "start_x": 100, "start_y": 100, "stride": 50},  # Index 1
@@ -60,7 +54,6 @@ def main():
         {"path": "right.jpg", "start_x": 100, "start_y": 100, "stride": 50}  # Index 5
     ]
 
-    # Pass each graphical image file into your functional extraction engine
     for index, config in enumerate(faces_config):
         face_matrix = process_face(
             config["path"], 
@@ -68,10 +61,8 @@ def main():
             config["start_y"], 
             config["stride"]
         )
-        # Store each returned face array block into the global 4D array
-        cube_data[index] = face_matrix
 
-    # Execute tracking matrix state audit query
+        cube_data[index] = face_matrix
     print(cube_data[0][0][0])
 
 if __name__ == "__main__":
